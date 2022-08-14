@@ -1,0 +1,13 @@
+.header{
+  max-width: 880px;
+  width: 100%;
+  border-bottom: 1px solid rgba(84, 84, 84, .7);
+  margin: 0 auto;
+  display: grid;
+  align-content: center;
+  grid-template-areas: 
+  "logo email button";
+  grid-auto-flow: row;
+  gap: 20px;
+  grid-template-columns: 1fr max-content max-content;
+}
