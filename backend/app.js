@@ -7,11 +7,13 @@ const bodyParser = require("body-parser");
 const { celebrate, Joi, errors } = require("celebrate");
 const helmet = require("helmet");
 const auth = require("./middlewares/auth");
+const { requestLogger, errorLogger } = require("./middlewares/logger");
+const cors = require("./middlewares/cors");
 const users = require("./routes/users");
 const cards = require("./routes/cards");
 const { login, createUser } = require("./controllers/users");
 const NotFoundError = require("./errors/NotFoundErr");
-const { requestLogger, errorLogger } = require("./middlewares/logger");
+
 
 // Слушаем 3000 порт
 const { PORT = 3000 } = process.env;
@@ -28,6 +30,8 @@ const app = express();
 // защищаемся от атак
 app.use(limiter);
 app.use(helmet());
+// разрешаем кросс-доменные запросы
+app.use(cors);
 // для обработки JSON-запросов
 app.use(bodyParser.json());
 // для обработки кук
@@ -36,7 +40,12 @@ app.use(cookieParser());
 mongoose.connect("mongodb://localhost:27017/mestodb", {});
 // подключаем логгер запросов
 app.use(requestLogger);
-
+// проверка сервера
+app.get('/crash-test', () => {
+  setTimeout(() => {
+    throw new Error('Сервер сейчас упадёт');
+  }, 0);
+})
 // теперь обработка роутов
 app.post(
   "/signin",
