@@ -11,9 +11,8 @@ const { requestLogger, errorLogger } = require("./middlewares/logger");
 const cors = require("./middlewares/cors");
 const users = require("./routes/users");
 const cards = require("./routes/cards");
-const { login, createUser } = require("./controllers/users");
+const { login, logout, createUser } = require("./controllers/users");
 const NotFoundError = require("./errors/NotFoundErr");
-
 
 // Слушаем 3000 порт
 const { PORT = 3000 } = process.env;
@@ -41,11 +40,11 @@ mongoose.connect("mongodb://localhost:27017/mestodb", {});
 // подключаем логгер запросов
 app.use(requestLogger);
 // проверка сервера
-app.get('/crash-test', () => {
+app.get("/crash-test", () => {
   setTimeout(() => {
-    throw new Error('Сервер сейчас упадёт');
+    throw new Error("Сервер сейчас упадёт");
   }, 0);
-})
+});
 // теперь обработка роутов
 app.post(
   "/signin",
@@ -72,6 +71,7 @@ app.post(
   }),
   createUser
 );
+app.post("/signout", logout);
 app.use(auth);
 app.use("/", users);
 app.use("/", cards);

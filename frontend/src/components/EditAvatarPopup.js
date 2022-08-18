@@ -3,6 +3,9 @@ import PopupWithForm from "./PopupWithForm";
 
 function EditAvatarPopup(props) {
   const avatarValue = React.useRef();
+  const [link, setLink] = React.useState("");
+  const [linkValid, setLinkValid] = React.useState(true);
+  const [errorLink, setErrorLink] = React.useState("");
 
   function handleSubmit(e) {
     e.preventDefault();
@@ -15,7 +18,15 @@ function EditAvatarPopup(props) {
   }
   React.useEffect(() => {
     avatarValue.current.value = "";
+    setErrorLink("");
+    setLinkValid(true);
   }, [props.isOpen]);
+
+  function handleLinkChange(e) {
+    setLink(e.target.value);
+    setLinkValid(e.target.validity.valid);
+    setErrorLink(e.target.validationMessage);
+  }
 
   return (
     <PopupWithForm
@@ -25,6 +36,7 @@ function EditAvatarPopup(props) {
       isOpen={props.isOpen}
       onClose={props.onClose}
       onSubmit={handleSubmit}
+      onButton={linkValid}
     >
       <input
         ref={avatarValue}
@@ -34,8 +46,16 @@ function EditAvatarPopup(props) {
         name="avatar_img"
         placeholder="Ссылка на картинку"
         required
+        value={link || ""}
+        onChange={handleLinkChange}
       />
-      <span className="avatar-img-error form__span"></span>
+      <span
+        className={`avatar-img-error ${
+          errorLink && "form__error_active"
+        } form__span`}
+      >
+        {errorLink}
+      </span>
     </PopupWithForm>
   );
 }

@@ -26,6 +26,7 @@
 @import url(./blocks/button/_type/button_type_login.css);
 @import url(./blocks/button/_type/button-type_signup.css);
 @import url(./blocks/button/_type/button_type_logout.css);
+@import url(./blocks/button/_status/button_status_inactive.css);
 
 @import url(./blocks/profile/profile.css);
 @import url(./blocks/profile/__about-me/profile__about-me.css);

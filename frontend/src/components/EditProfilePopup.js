@@ -5,6 +5,11 @@ import { CurrentUserContext } from "../contexts/CurrentUserContext";
 function EditProfilePopup(props) {
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
+  const [nameValid, setNameValid] = React.useState(true);
+  const [descriptionValid, setDescriptionValid] = React.useState(true);
+  const [errorName, setErrorName] = React.useState("");
+  const [errorDescription, setErrorDescription] = React.useState("");
+
   // Подписка на контекст
   const currentUser = React.useContext(CurrentUserContext);
   // После загрузки текущего пользователя из API
@@ -17,13 +22,22 @@ function EditProfilePopup(props) {
   React.useEffect(() => {
     setName(currentUser.name);
     setDescription(currentUser.about);
+    setErrorName("");
+    setErrorDescription("");
+    setNameValid(true);
+    setDescriptionValid(true);
   }, [props.isOpen]);
+  
   function handleNameChange(e) {
     setName(e.target.value);
+    setNameValid(e.target.validity.valid);
+    setErrorName(e.target.validationMessage);
   }
 
   function handleDescriprtionChange(e) {
     setDescription(e.target.value);
+    setDescriptionValid(e.target.validity.valid);
+    setErrorDescription(e.target.validationMessage);
   }
 
   function handleSubmit(e) {
@@ -41,6 +55,7 @@ function EditProfilePopup(props) {
       isOpen={props.isOpen}
       onClose={props.onClose}
       onSubmit={handleSubmit}
+      onButton={nameValid && descriptionValid}
     >
       <input
         type="text"
@@ -54,7 +69,9 @@ function EditProfilePopup(props) {
         maxLength="40"
         required
       />
-      <span className="form__span el-name-error"></span>
+      <span className={`el-name-error ${
+          errorName && "form__error_active"
+        } form__span`}>{errorName}</span>
       <input
         type="text"
         value={description || ""}
@@ -67,7 +84,9 @@ function EditProfilePopup(props) {
         maxLength="200"
         required
       />
-      <span className="form__span about-me-error"></span>
+      <span className={`about-me-error ${
+          errorDescription && "form__error_active"
+        } form__span`}>{errorDescription}</span>
     </PopupWithForm>
   );
 }

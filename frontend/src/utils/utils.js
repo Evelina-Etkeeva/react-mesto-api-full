@@ -6,11 +6,11 @@ export const validationDict = {
   inputErrorClass: "form__item-error",
   errorClass: "form__error_active",
 }; //словарь для валидации форм
-
-export const token = "a81905a8-70e9-49b5-82c2-f5f8e94b1f23";
+// не забываем поменять baseurl
 export const baseUrl = "https://api.myproject.nomoredomains.sbs";
-export const baseUrlAuth = baseUrl;
+// export const baseUrl = "http://localhost:3000";
+
 export const headers = {
-  authorization: token,
+  "Accept": "application/json",
   "Content-Type": "application/json",
 };

@@ -1,4 +1,4 @@
-import { baseUrlAuth } from "./utils";
+import { headers, baseUrl } from "./utils";
 
 function checkResponse(res){
   if (res.ok) {
@@ -9,34 +9,35 @@ function checkResponse(res){
 }
 
 export const register = (password, email) => {
-  return fetch(`${baseUrlAuth}/signup`, {
+  return fetch(`${baseUrl}/signup`, {
     method: "POST",
-    headers: {
-      Accept: "application/json",
-      "Content-Type": "application/json",
-    },
+    credentials: "include",
+    headers: headers,
     body: JSON.stringify({ password, email }),
   }).then(checkResponse);
 };
 
 export const login = (password, email) => {
-  return fetch(`${baseUrlAuth}/signin`, {
+  return fetch(`${baseUrl}/signin`, {
     method: "POST",
-    headers: {
-      Accept: "application/json",
-      "Content-Type": "application/json",
-    },
+    credentials: "include",
+    headers: headers,
     body: JSON.stringify({ password, email }),
   }).then(checkResponse);
 };
 
-export const checkUser = (jwt) => {
-  return fetch(`${baseUrlAuth}/users/me`, {
+export const logout = () => {
+  return fetch(`${baseUrl}/signout`, {
+    method: "POST",
+    credentials: "include",
+    headers: headers,
+  }).then(checkResponse);
+};
+
+export const checkUser = () => {
+  return fetch(`${baseUrl}/users/me`, {
     method: "GET",
-    headers: {
-      Accept: "application/json",
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${jwt}`,
-    },
+    credentials: "include",
+    headers: headers,
   }).then(checkResponse);
 };

@@ -11,7 +11,7 @@ import ProtectedRoute from "./ProtectedRoute";
 import { Route, Switch, useHistory, withRouter } from "react-router-dom";
 import Signin from "./Signin";
 import Signup from "./Signup";
-import { register, login, checkUser } from "../utils/auth";
+import { register, login, logout, checkUser } from "../utils/auth";
 import InfoTooltip from "./InfoTooltip";
 
 function App() {
@@ -29,8 +29,10 @@ function App() {
   const [infoTooltipAlt, setInfoTooltipAlt] = useState("");
   const [infoTooltipSuccess, setInfoTooltipSuccess] = useState(true);
 
+  // отрисовать страницу после входа
   useEffect(() => {
-    Promise.all([myApi.getInitialCards(), myApi.getUserData()])
+    if (loggedIn) {
+      Promise.all([myApi.getInitialCards(), myApi.getUserData()])
       .then(([data, user]) => {
         setCards(data);
         setCurrentUser(user);
@@ -38,11 +40,25 @@ function App() {
       .catch((err) => {
         console.error(err);
       });
-  }, []);
+    }
+  }, [loggedIn]);
+  
+  // войти автоматически
+  useEffect(() => {
+    checkUser()
+      .then((res) => {
+          setLoggedIn(true);
+          setEmail(res.email);
+          history.push("/");
+      })
+      .catch((err) => {
+        console.log("Something went wrong: ", err);
+      });
+    }, [history]);
 
   function handleCardLike(card) {
     // Снова проверяем, есть ли уже лайк на этой карточке
-    const isLiked = card.likes.some((i) => i._id === currentUser._id);
+    const isLiked = card.likes.some((i) => i === currentUser._id);
 
     if (!isLiked) {
       myApi
@@ -106,7 +122,7 @@ function App() {
 
   function handleUpdateUser(data) {
     myApi
-      .updateUserData(data)
+      .updateUserData(data) 
       .then((newUser) => {
         setCurrentUser(newUser);
         closeAllPopups();
@@ -146,8 +162,8 @@ function App() {
         setInfoTooltipSuccess(true);
         setInfoTooltipMessage("Вы успешно зарегистрировались!");
         setInfoTooltipAlt("Изображение информирующее, что всё хорошо!");
-        setLoggedIn(true);
-        history.push("/");
+        handleSigninSubmit(data);
+        // history.push("/sign-in");
       })
       .catch((err) => {
         setInfoTooltipSuccess(false);
@@ -163,45 +179,25 @@ function App() {
   function handleSigninSubmit(data) {
     login(data.password, data.email)
       .then((res) => {
-        if (res.token) {
-          // сохраняем токен
           setLoggedIn(true);
           setEmail(data.email);
-          localStorage.setItem("token", res.token);
           history.push("/");
-        }
-      })
+        })
       .catch((err) => {
         console.log("Something went wrong: ", err);
       });
   }
 
-  function tokenCheck() {
-    const token = localStorage.getItem("token");
-    if (token) {
-      checkUser(token)
-        .then((res) => {
-          if (res) {
-            setLoggedIn(true);
-            setEmail(res.data.email);
-            history.push("/");
-          }
-        })
-        .catch((err) => {
-          console.log("Something went wrong: ", err);
-        });
-    }
-  }
-
   function handleSignout() {
-    localStorage.removeItem("token");
-    setLoggedIn(false);
-    history.push("/sign-in");
+    logout()
+      .then(()=>{
+        setLoggedIn(false);
+        history.push("/sign-in");    
+      })
+      .catch((err) => {
+        console.log("Something went wrong: ", err);
+      });
   }
-
-  React.useEffect(() => {
-    tokenCheck();
-  }, []);
 
   return (
     <CurrentUserContext.Provider value={currentUser}>

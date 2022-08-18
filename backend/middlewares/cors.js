@@ -3,7 +3,7 @@ const cors = require("cors");
 const allowedCors = [
   "https://myproject.nomoredomains.sbs",
   "http://myproject.nomoredomains.sbs",
-  "localhost:3000",
+  "http://localhost:3001",
 ];
 
 const corsOptions = {

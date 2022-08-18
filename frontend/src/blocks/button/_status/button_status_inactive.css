@@ -1,0 +1,6 @@
+.button_status_inactive{
+    background-color: rgba(255, 255, 255, 1);
+    color: rgba(0, 0, 0, 1);
+    border-radius: 2px;
+    border: 1px solid black;
+}
