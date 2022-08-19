@@ -1,18 +1,15 @@
-require("dotenv").config();
-const express = require("express");
-const mongoose = require("mongoose");
-const rateLimit = require("express-rate-limit");
-const cookieParser = require("cookie-parser");
-const bodyParser = require("body-parser");
-const { celebrate, Joi, errors } = require("celebrate");
-const helmet = require("helmet");
-const auth = require("./middlewares/auth");
-const { requestLogger, errorLogger } = require("./middlewares/logger");
-const cors = require("./middlewares/cors");
-const users = require("./routes/users");
-const cards = require("./routes/cards");
-const { login, logout, createUser } = require("./controllers/users");
-const NotFoundError = require("./errors/NotFoundErr");
+require('dotenv').config();
+const express = require('express');
+const mongoose = require('mongoose');
+const rateLimit = require('express-rate-limit');
+const cookieParser = require('cookie-parser');
+const bodyParser = require('body-parser');
+const { errors } = require('celebrate');
+const helmet = require('helmet');
+const { requestLogger, errorLogger } = require('./middlewares/logger');
+const cors = require('./middlewares/cors');
+const handleErrors = require('./middlewares/errs');
+const router = require('./routes');
 
 // Слушаем 3000 порт
 const { PORT = 3000 } = process.env;
@@ -26,73 +23,26 @@ const limiter = rateLimit({
 
 const app = express();
 
+// разрешаем кросс-доменные запросы
+app.use(cors);
+// подключаем логгер запросов
+app.use(requestLogger);
 // защищаемся от атак
 app.use(limiter);
 app.use(helmet());
-// разрешаем кросс-доменные запросы
-app.use(cors);
 // для обработки JSON-запросов
 app.use(bodyParser.json());
 // для обработки кук
 app.use(cookieParser());
 // подключаемся к серверу mongo
-mongoose.connect("mongodb://localhost:27017/mestodb", {});
-// подключаем логгер запросов
-app.use(requestLogger);
-// проверка сервера
-app.get("/crash-test", () => {
-  setTimeout(() => {
-    throw new Error("Сервер сейчас упадёт");
-  }, 0);
-});
-// теперь обработка роутов
-app.post(
-  "/signin",
-  celebrate({
-    body: Joi.object().keys({
-      email: Joi.string().required().email(),
-      password: Joi.string().required(),
-    }),
-  }),
-  login
-);
-app.post(
-  "/signup",
-  celebrate({
-    body: Joi.object().keys({
-      email: Joi.string().required().email(),
-      password: Joi.string().required(),
-      name: Joi.string().min(2).max(30),
-      about: Joi.string().min(2).max(30),
-      avatar: Joi.string().pattern(
-        /(https?:\/\/)?(www\.)?[A-Za-z0-9-]*\.[A-Za-z0-9-]{2,}(\/[\w\-._~:/?#[\]@!$&'()*+,;=]*)*/
-      ),
-    }),
-  }),
-  createUser
-);
-app.post("/signout", logout);
-app.use(auth);
-app.use("/", users);
-app.use("/", cards);
-app.use((req, res, next) => {
-  next(new NotFoundError("Указанный путь не найден"));
-});
-
+mongoose.connect('mongodb://localhost:27017/mestodb', {});
+// обрабатываем все роуты
+app.use(router);
 // логгер ошибок
 app.use(errorLogger);
 // обработка ошибок celebrate
 app.use(errors());
-app.use((err, req, res, next) => {
-  // если у ошибки нет статуса, выставляем 500
-  const { statusCode = 500, message } = err;
-
-  res.status(statusCode).send({
-    // проверяем статус и выставляем сообщение в зависимости от него
-    message: statusCode === 500 ? "На сервере произошла ошибка" : message,
-  });
-  next();
-});
+app.use(handleErrors);
 
 app.listen(PORT, () => {
   // Если всё работает, консоль покажет, какой порт приложение слушает

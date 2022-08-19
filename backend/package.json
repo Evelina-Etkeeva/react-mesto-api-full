@@ -7,7 +7,7 @@
     "lint": "npx eslint --fix ./",
     "start": "node app.js",
     "dev": "nodemon app.js",
-    "deploy": "scp -r ./controllers ./errors ./middlewares ./models ./routes app.js .env package.json package-lock.json evelina@51.250.3.254:~/mesto-backend/"
+    "deploy": "scp -r ./controllers ./errors ./middlewares ./utils ./models ./routes app.js .env package.json package-lock.json evelina@51.250.3.254:~/mesto-backend/"
   },
   "devDependencies": {
     "eslint": "^8.19.0",

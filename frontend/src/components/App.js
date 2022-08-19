@@ -33,28 +33,28 @@ function App() {
   useEffect(() => {
     if (loggedIn) {
       Promise.all([myApi.getInitialCards(), myApi.getUserData()])
-      .then(([data, user]) => {
-        setCards(data);
-        setCurrentUser(user);
-      })
-      .catch((err) => {
-        console.error(err);
-      });
+        .then(([data, user]) => {
+          setCards(data);
+          setCurrentUser(user);
+        })
+        .catch((err) => {
+          console.error(err);
+        });
     }
   }, [loggedIn]);
-  
+
   // войти автоматически
   useEffect(() => {
     checkUser()
       .then((res) => {
-          setLoggedIn(true);
-          setEmail(res.email);
-          history.push("/");
+        setLoggedIn(true);
+        setEmail(res.email);
+        history.push("/");
       })
       .catch((err) => {
         console.log("Something went wrong: ", err);
       });
-    }, [history]);
+  }, [history]);
 
   function handleCardLike(card) {
     // Снова проверяем, есть ли уже лайк на этой карточке
@@ -122,7 +122,7 @@ function App() {
 
   function handleUpdateUser(data) {
     myApi
-      .updateUserData(data) 
+      .updateUserData(data)
       .then((newUser) => {
         setCurrentUser(newUser);
         closeAllPopups();
@@ -163,7 +163,6 @@ function App() {
         setInfoTooltipMessage("Вы успешно зарегистрировались!");
         setInfoTooltipAlt("Изображение информирующее, что всё хорошо!");
         handleSigninSubmit(data);
-        // history.push("/sign-in");
       })
       .catch((err) => {
         setInfoTooltipSuccess(false);
@@ -179,20 +178,30 @@ function App() {
   function handleSigninSubmit(data) {
     login(data.password, data.email)
       .then((res) => {
-          setLoggedIn(true);
-          setEmail(data.email);
-          history.push("/");
-        })
+        setLoggedIn(true);
+        setEmail(data.email);
+        history.push("/");
+      })
       .catch((err) => {
+        setInfoTooltipSuccess(false);
+        if (err === "Error: 401") {
+          setInfoTooltipMessage(
+            "Введен неверный логин или пароль. Попробуйте ещё раз."
+          );
+        } else {
+          setInfoTooltipMessage("Что-то пошло не так! Попробуйте ещё раз.");
+        }
+        setInfoTooltipAlt("Изображение информирующее, что всё плохо!");
+        setInfoTooltipIsOpen(true);
         console.log("Something went wrong: ", err);
       });
   }
 
   function handleSignout() {
     logout()
-      .then(()=>{
+      .then(() => {
         setLoggedIn(false);
-        history.push("/sign-in");    
+        history.push("/sign-in");
       })
       .catch((err) => {
         console.log("Something went wrong: ", err);
